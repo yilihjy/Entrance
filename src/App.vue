@@ -1,30 +1,28 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view />
+  <entrance-desktop :backgrounds="backgrounds" backgroundMode="aspectFill" />
 </template>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
+@import url("./scss/global.scss");
 </style>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import EntranceDesktop from "@/components/Desktop.vue"; // @ is an alias to /src
+
+export default defineComponent({
+  name: "Home",
+  components: {
+    EntranceDesktop
+  },
+  data() {
+    return {
+      backgrounds: [
+        "/img/background/background-00.jpg",
+        "/img/background/background-01.jpg",
+        "/img/background/background-02.jpg"
+      ]
+    };
+  }
+});
+</script>
