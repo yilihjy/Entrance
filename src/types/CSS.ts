@@ -5,3 +5,11 @@ export interface CSSBackground {
   backgroundPosition?: string;
   backgroundColor?: string;
 }
+
+export interface CSSDesktopMenu {
+  display?: string;
+  top?: string;
+  left?: string;
+  bottom?: string;
+  right?: string;
+}

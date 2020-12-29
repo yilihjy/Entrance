@@ -6,8 +6,8 @@
     @click="clickDesktop($event)"
   >
     <entrance-menu
-      :menuInformation="menuInformation"
-      :menuItems="menuItems"
+      :menuOption="menuOption"
+      @close="closeDesktopMenu()"
     ></entrance-menu>
   </div>
 </template>
@@ -19,7 +19,7 @@
   position: fixed;
   top: 0px;
   left: 0px;
-  transition: background 500ms;
+  transition: background-image 500ms; // 标准中background-image不支持动画，详见https://www.w3.org/TR/css-backgrounds-3/#background-image，参考解决方案：https://stackoverflow.com/questions/9483364/css3-background-image-transition，https://blog.csdn.net/yhb241/article/details/51489093
 }
 </style>
 
@@ -27,7 +27,7 @@
 import { defineComponent, PropType } from "vue";
 import Console from "@/utils/console";
 import { ImageMode } from "@/types/ImageMode";
-import { CSSBackground } from "@/types/CSSBackground";
+import { CSSBackground } from "@/types/CSS";
 import { Desktop } from "@/types/Desktop";
 import EntranceMenu from "@/components/Menu.vue";
 
@@ -50,15 +50,13 @@ export default defineComponent({
     return {
       backgroundIndex: 0,
       loadedBackgrounds: [],
-      menuInformation: {
-        showMenu: false,
-        parentWidth: 0,
-        parentHeight: 0,
-        clinetX: 0,
-        clientY: 0
-      },
-      menuItems: [],
-      keyboardActionMap: { keys: [], actions: [] }
+      menuOption: {
+        isRootMenu: true,
+        rootMenuParentElement: document.getElementsByTagName("body")[0],
+        clientX: 0,
+        clientY: 0,
+        menuGroups: []
+      }
     } as Desktop;
   },
   computed: {
@@ -130,26 +128,18 @@ export default defineComponent({
   created() {
     this.loadBackgroundimages(this.backgrounds);
   },
-  mounted() {
-    window.addEventListener("keydown", this.globalKeydown);
-  },
-  unmounted() {
-    window.removeEventListener("keydown", this.globalKeydown);
-  },
   methods: {
     /**
      * 关闭桌面菜单
      */
     closeDesktopMenu() {
-      this.menuInformation = {
-        showMenu: false,
-        parentWidth: 0,
-        parentHeight: 0,
-        clinetX: 0,
-        clientY: 0
+      this.menuOption = {
+        isRootMenu: true,
+        rootMenuParentElement: document.getElementsByTagName("body")[0],
+        clientX: 0,
+        clientY: 0,
+        menuGroups: []
       };
-      this.menuItems = [];
-      this.keyboardActionMap = { keys: [], actions: [] };
     },
     /**
      * 点击桌面空白处
@@ -161,6 +151,7 @@ export default defineComponent({
      * 鼠标右键点击桌面或者键盘菜单键
      */
     clickDesktopByRight(event: MouseEvent) {
+      Console.log(event);
       event.preventDefault();
       const target = event.target as HTMLElement;
       const nextBackground = () => {
@@ -170,35 +161,25 @@ export default defineComponent({
       const reload = () => {
         location.reload();
       };
-      /**
-       * 设置菜单内容
-       */
-      this.menuItems = [
-        {
-          mainText: "下一个桌面背景(N)",
-          action: nextBackground
-        },
-        {
-          mainText: "刷新(E)",
-          action: reload
-        }
-      ];
-      /**
-       * 设置键盘映射
-       */
-      this.keyboardActionMap = {
-        keys: [78, 69],
-        actions: [nextBackground, reload]
-      };
-      /**
-       * 设置菜单位置
-       */
-      this.menuInformation = {
-        showMenu: true,
-        parentWidth: target.offsetWidth,
-        parentHeight: target.offsetHeight,
-        clinetX: event.clientX,
-        clientY: event.clientY
+      this.menuOption = {
+        isRootMenu: true,
+        rootMenuParentElement: target,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        menuGroups: [
+          [
+            {
+              mainText: "下一个桌面背景(N)",
+              action: nextBackground,
+              keycode: 78
+            },
+            {
+              mainText: "刷新(E)",
+              action: reload,
+              keycode: 69
+            }
+          ]
+        ]
       };
     },
     /**
@@ -231,17 +212,6 @@ export default defineComponent({
           this.loadBackgroundimages(loadQueue);
         };
         imgElement.src = preLoadURL;
-      }
-    },
-    /**
-     * 全局键盘监听，处理菜单选项对应的快捷键
-     */
-    globalKeydown(event: KeyboardEvent) {
-      const index = this.keyboardActionMap.keys.indexOf(event.keyCode);
-      if (index >= 0) {
-        const action = this.keyboardActionMap.actions[index];
-        action();
-        this.closeDesktopMenu();
       }
     }
   }

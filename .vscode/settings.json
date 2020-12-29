@@ -1,0 +1,16 @@
+{
+  "editor.tabSize": 2,
+  "vetur.validation.template": false,
+  "vetur.format.defaultFormatterOptions": {
+    "prettier": {
+      // Prettier option here
+      "trailingComma": "none",
+      "arrowParens": "avoid"
+    }
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ]
+}
